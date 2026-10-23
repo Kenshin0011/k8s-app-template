@@ -1,0 +1,94 @@
+nameOverride: ""
+fullnameOverride: ""
+image:
+  repository: ghcr.io/example/my-app
+  tag: ""
+  digest: ""
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+replicaCount: 2
+serviceAccount:
+  create: true
+  automount: false
+  annotations: {}
+podAnnotations: {}
+podLabels: {}
+service:
+  type: ClusterIP
+  port: 8080
+  annotations: {}
+container:
+  port: 8080
+  name: app
+  command: []
+  args: []
+  env: []
+  envFrom: []
+config:
+  enabled: false
+  data: {}
+secret:
+  existingSecret: ""
+  env: []
+probes:
+  enabled: true
+  startup:
+    path: /health
+    initialDelaySeconds: 0
+    periodSeconds: 5
+    failureThreshold: 30
+  readiness:
+    path: /health
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    failureThreshold: 3
+  liveness:
+    path: /health
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    failureThreshold: 3
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop: [ALL]
+  seccompProfile:
+    type: RuntimeDefault
+podSecurityContext:
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+pdb:
+  enabled: true
+  minAvailable: 1
+networkPolicy:
+  enabled: false
+  ingress: []
+  egress: []
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []

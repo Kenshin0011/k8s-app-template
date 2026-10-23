@@ -1,0 +1,17 @@
+name: Validate Kubernetes manifests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  helm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - name: Lint chart
+        run: helm lint chart
+      - name: Render chart
+        run: helm template my-app chart --namespace my-app > /tmp/manifests.yaml

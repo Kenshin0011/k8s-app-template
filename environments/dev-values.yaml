@@ -1,0 +1,15 @@
+image:
+  repository: ghcr.io/example/my-app
+  tag: dev
+replicaCount: 1
+pdb:
+  enabled: false
+autoscaling:
+  enabled: false
+ingress:
+  enabled: true
+  hosts:
+    - host: my-app.local
+      paths:
+        - path: /
+          pathType: Prefix

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: k8s-app
+description: A secure, reusable Helm chart for deploying a containerized application.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
