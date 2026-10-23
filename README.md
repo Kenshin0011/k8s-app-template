@@ -22,8 +22,9 @@ flowchart LR
 
     ConfigMap[ConfigMap<br/>optional] -. config .-> PodA
     ConfigMap -. config .-> PodB
-    Secret[Existing Secret] -. env .-> PodA
-    Secret -. env .-> PodB
+    Secret[SealedSecret<br/>encrypted in Git] --> SecretRuntime[Secret<br/>created in cluster]
+    SecretRuntime -. env .-> PodA
+    SecretRuntime -. env .-> PodB
 
     Policy[NetworkPolicy<br/>optional] -. controls traffic .-> PodA
     Policy -. controls traffic .-> PodB
@@ -40,7 +41,7 @@ flowchart LR
 | HPA | Scales replicas from CPU utilization | Disabled |
 | PDB | Limits voluntary disruption during maintenance | Enabled |
 | ConfigMap | Non-sensitive application configuration | Disabled |
-| Secret | Sensitive configuration supplied by an existing Secret | Disabled |
+| SealedSecret | Encrypted configuration committed to Git and decrypted in-cluster | Disabled |
 | NetworkPolicy | Optional ingress/egress traffic restrictions | Disabled |
 
 Ingress and HPA are intentionally disabled by default because their exact behavior depends on the cluster's ingress controller and metrics server.
@@ -102,4 +103,28 @@ make install
 make uninstall
 ```
 
-Secrets are referenced rather than stored in Git. Set `secret.existingSecret` to an existing Kubernetes Secret; its keys will be exposed as environment variables.
+## Sealed Secrets
+
+Install the Sealed Secrets controller once per cluster, then create an encrypted secret with `kubeseal`:
+
+```bash
+kubectl create secret generic my-app-secret \
+  --from-literal=DATABASE_URL='postgres://...' \
+  --namespace my-app \
+  --dry-run=client -o json \
+  | kubeseal --format yaml > /tmp/my-app-sealed-secret.yaml
+```
+
+Copy the generated `spec.encryptedData` into an environment values file and enable the feature:
+
+```yaml
+secret:
+  name: my-app-secret
+
+sealedSecret:
+  enabled: true
+  encryptedData:
+    DATABASE_URL: Ag...
+```
+
+The encrypted values can be committed to Git, but plaintext values must never be committed. The controller creates the regular Kubernetes Secret that the Deployment references. Do not install the controller as part of this application chart; it is a cluster-level component.

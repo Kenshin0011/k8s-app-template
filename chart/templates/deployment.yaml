@@ -53,11 +53,11 @@ spec:
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if or .Values.secret.existingSecret .Values.container.envFrom }}
+          {{- if or .Values.sealedSecret.enabled .Values.secret.name .Values.container.envFrom }}
           envFrom:
-            {{- if .Values.secret.existingSecret }}
+            {{- if or .Values.sealedSecret.enabled .Values.secret.name }}
             - secretRef:
-                name: {{ .Values.secret.existingSecret }}
+                name: {{ include "k8s-app.secretName" . }}
             {{- end }}
             {{- with .Values.container.envFrom }}
             {{- toYaml . | nindent 12 }}

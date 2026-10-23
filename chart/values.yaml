@@ -28,8 +28,13 @@ config:
   enabled: false
   data: {}
 secret:
-  existingSecret: ""
-  env: []
+  name: ""
+
+sealedSecret:
+  enabled: false
+  encryptedData: {}
+  annotations: {}
+  type: Opaque
 probes:
   enabled: true
   startup:
