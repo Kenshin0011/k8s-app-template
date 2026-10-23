@@ -28,6 +28,8 @@ flowchart LR
 
     Policy[NetworkPolicy<br/>optional] -. controls traffic .-> PodA
     Policy -. controls traffic .-> PodB
+    GitHub[GitHub repository] --> ArgoCD[Argo CD<br/>optional]
+    ArgoCD -->|sync| Deployment
 ```
 
 ### Resource responsibilities
@@ -45,6 +47,18 @@ flowchart LR
 | NetworkPolicy | Optional ingress/egress traffic restrictions | Disabled |
 
 Ingress and HPA are intentionally disabled by default because their exact behavior depends on the cluster's ingress controller and metrics server.
+
+## Argo CD
+
+The `argocd/application.yaml` manifest defines an optional Argo CD `Application` that watches this repository and synchronizes the `chart/` Helm chart into the `my-app` namespace.
+
+```bash
+kubectl apply -f argocd/application.yaml
+```
+
+The Argo CD installation itself is cluster-level infrastructure and is intentionally not included in this repository. The Application uses automated sync with pruning and self-healing enabled, so review the target repository and namespace before applying it.
+
+For environment-specific values, create an Argo CD Application per environment and reference the appropriate values file. Keep encrypted Sealed Secrets in the same GitOps repository or a dedicated configuration repository.
 
 ## Deployment flow
 
