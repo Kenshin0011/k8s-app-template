@@ -4,6 +4,47 @@ Reusable Helm chart for deploying a containerized application to Kubernetes.
 
 This is application-focused: Deployment, Service, probes, resources, security context, HPA, PDB, Ingress and optional NetworkPolicy. Databases and cluster infrastructure stay outside the chart.
 
+## Kubernetes architecture
+
+```mermaid
+flowchart LR
+    User[Client] --> DNS[DNS]
+    DNS --> Ingress[Ingress]
+    Ingress --> Service[Service<br/>ClusterIP]
+    Service --> PodA[Pod 1<br/>Application container]
+    Service --> PodB[Pod 2<br/>Application container]
+
+    Deployment[Deployment] --> PodA
+    Deployment --> PodB
+    HPA[HPA<br/>optional] -. scales .-> Deployment
+    PDB[PDB<br/>optional] -. protects .-> PodA
+    PDB -. protects .-> PodB
+
+    ConfigMap[ConfigMap<br/>optional] -. config .-> PodA
+    ConfigMap -. config .-> PodB
+    Secret[Existing Secret] -. env .-> PodA
+    Secret -. env .-> PodB
+
+    Policy[NetworkPolicy<br/>optional] -. controls traffic .-> PodA
+    Policy -. controls traffic .-> PodB
+```
+
+### Resource responsibilities
+
+| Resource | Responsibility | Default |
+| --- | --- | --- |
+| Ingress | External HTTP/HTTPS entry point and host/path routing | Disabled |
+| Service | Stable internal endpoint for Pods | Enabled |
+| Deployment | Rolling updates and replica management | Enabled |
+| Pod | Runs the application container and health probes | Enabled |
+| HPA | Scales replicas from CPU utilization | Disabled |
+| PDB | Limits voluntary disruption during maintenance | Enabled |
+| ConfigMap | Non-sensitive application configuration | Disabled |
+| Secret | Sensitive configuration supplied by an existing Secret | Disabled |
+| NetworkPolicy | Optional ingress/egress traffic restrictions | Disabled |
+
+Ingress and HPA are intentionally disabled by default because their exact behavior depends on the cluster's ingress controller and metrics server.
+
 ## Deployment flow
 
 ```mermaid
